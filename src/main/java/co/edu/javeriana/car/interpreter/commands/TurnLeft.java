@@ -1,5 +1,7 @@
 package co.edu.javeriana.car.interpreter.commands;
 
+import java.util.Map;
+
 import co.edu.javeriana.car.Car;
 import co.edu.javeriana.car.interpreter.ASTNode;
 
@@ -10,8 +12,8 @@ public class TurnLeft extends MovementCommand {
 	}
 
 	@Override
-	public Object execute() {
-		car.left((float)arg1.execute());
+	public Object execute(Map<String, Object> symbolTable) {
+		car.left((float)arg1.execute(null));
 		return null;
 	}
 

@@ -1,5 +1,7 @@
 package co.edu.javeriana.car.interpreter.operations.numeric;
 
+import java.util.Map;
+
 import co.edu.javeriana.car.interpreter.ASTNode;
 
 public class Multiplication extends NumericExpression {
@@ -9,8 +11,8 @@ public class Multiplication extends NumericExpression {
 	}	
 	
 	@Override
-	public Object execute() {
-		return (float)op1.execute() * (float)op2.execute();
+	public Object execute(Map<String, Object> symbolTable) {
+		return (float)op1.execute(null) * (float)op2.execute(null);
 	}
 
 }

@@ -1,5 +1,7 @@
 package co.edu.javeriana.car.interpreter.operations.comparison;
 
+import java.util.Map;
+
 import co.edu.javeriana.car.interpreter.ASTNode;
 
 public class GreaterOrEqualThan extends Comparison {
@@ -9,8 +11,8 @@ public class GreaterOrEqualThan extends Comparison {
 	}
 
 	@Override
-	public Object execute() {
-		return (float)left.execute() >= (float)right.execute();
+	public Object execute(Map<String, Object> symbolTable) {
+		return (float)left.execute(null) >= (float)right.execute(null);
 	}
 
 }

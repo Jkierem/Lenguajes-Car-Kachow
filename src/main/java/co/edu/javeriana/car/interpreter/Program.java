@@ -1,6 +1,7 @@
 package co.edu.javeriana.car.interpreter;
 
 import java.util.List;
+import java.util.Map;
 
 public class Program extends ASTNode {
 	
@@ -11,9 +12,9 @@ public class Program extends ASTNode {
 	}
 
 	@Override
-	public Object execute() {
+	public Object execute(Map<String, Object> symbolTable) {
 		this.sentences.forEach((node)->{
-			node.execute();
+			node.execute(null);
 		});
 		return null;
 	}

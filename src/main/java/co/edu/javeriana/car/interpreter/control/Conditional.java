@@ -1,6 +1,7 @@
 package co.edu.javeriana.car.interpreter.control;
 
 import java.util.List;
+import java.util.Map;
 
 import co.edu.javeriana.car.interpreter.ASTNode;
 
@@ -14,14 +15,14 @@ public class Conditional extends Control {
 	}
 	
 	@Override
-	public Object execute() {
-		if( (boolean)this.condition.execute() ) {
+	public Object execute(Map<String, Object> symbolTable) {
+		if( (boolean)this.condition.execute(null) ) {
 			this.main_body.forEach((node)->{
-				node.execute();
+				node.execute(null);
 			});
 		}else if( this.else_body != null ) {
 			this.else_body.forEach((node)->{
-				node.execute();
+				node.execute(null);
 			});
 		}
 		return null;

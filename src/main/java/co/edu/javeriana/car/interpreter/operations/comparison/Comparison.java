@@ -1,5 +1,7 @@
 package co.edu.javeriana.car.interpreter.operations.comparison;
 
+import java.util.Map;
+
 import co.edu.javeriana.car.interpreter.ASTNode;
 
 public abstract class Comparison extends ASTNode {
@@ -11,6 +13,6 @@ public abstract class Comparison extends ASTNode {
 		this.right = right;
 	}
 	
-	public abstract Object execute();
+	public abstract Object execute(Map<String, Object> symbolTable);
 
 }

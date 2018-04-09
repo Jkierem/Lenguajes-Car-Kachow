@@ -1,6 +1,7 @@
 package co.edu.javeriana.car.interpreter.control;
 
 import java.util.List;
+import java.util.Map;
 
 import co.edu.javeriana.car.interpreter.ASTNode;
 
@@ -11,10 +12,10 @@ public class While extends Control {
 	}
 
 	@Override
-	public Object execute() {
-		while( (boolean)condition.execute() ) {
+	public Object execute(Map<String, Object> symbolTable) {
+		while( (boolean)condition.execute(null) ) {
 			main_body.forEach((node)->{
-				node.execute();
+				node.execute(null);
 			});
 		}
 		return null;

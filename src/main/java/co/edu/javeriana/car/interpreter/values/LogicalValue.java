@@ -1,5 +1,7 @@
 package co.edu.javeriana.car.interpreter.values;
 
+import java.util.Map;
+
 import co.edu.javeriana.car.interpreter.ASTNode;
 
 public class LogicalValue extends ASTNode {
@@ -11,7 +13,7 @@ public class LogicalValue extends ASTNode {
 	}
 	
 	@Override
-	public Object execute() {
+	public Object execute(Map<String, Object> symbolTable) {
 		return this.value;
 	}
 

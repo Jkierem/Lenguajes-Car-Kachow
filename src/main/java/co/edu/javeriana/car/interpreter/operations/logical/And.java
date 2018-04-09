@@ -1,5 +1,7 @@
 package co.edu.javeriana.car.interpreter.operations.logical;
 
+import java.util.Map;
+
 import co.edu.javeriana.car.interpreter.ASTNode;
 
 public class And extends LogicalExpression {
@@ -13,8 +15,8 @@ public class And extends LogicalExpression {
 	}
 	
 	@Override
-	public Object execute() {
-		return (boolean)op1.execute() && (boolean)op2.execute();
+	public Object execute(Map<String, Object> symbolTable) {
+		return (boolean)op1.execute(null) && (boolean)op2.execute(null);
 	}
 
 }

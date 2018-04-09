@@ -1,5 +1,17 @@
 grammar Car;
 
+@parser::header{
+	import java.util.List;
+	import java.util.ArrayList;
+	import co.edu.javeriana.car.interpreter.*;
+	import co.edu.javeriana.car.interpreter.commands.*;
+	import co.edu.javeriana.car.interpreter.control.*;
+	import co.edu.javeriana.car.interpreter.operations.comparison.*;
+	import co.edu.javeriana.car.interpreter.operations.logical.*;
+	import co.edu.javeriana.car.interpreter.operations.numeric.*;
+	import co.edu.javeriana.car.interpreter.values.*;
+}
+
 @parser::members {
 
 private Car car;
@@ -21,17 +33,19 @@ program returns [ASTNode node]:
 	};
 
 sentence returns [ASTNode node]: 
-	s=conditional { $node = $s.node } | 
-	s=while_loop  { $node = $s.node } | 
-	s=command     { $node = $s.node } ;
+	s=conditional { $node = $s.node; } | 
+	s1=while_loop  { $node = $s1.node; } | 
+	s2=command     { $node = $s2.node; } |
+	s3=var_declare|
+	s4=var_assign;
 	
 command returns [ASTNode node]: 
 	c=run_forward   { $node = $c.node; } | 
-	c=run_backwards { $node = $c.node; } | 
-	c=turn_left     { $node = $c.node; } | 
-	c=turn_right    { $node = $c.node; } | 
-	c=set_color     { $node = $c.node; } |
-	c=writeln       { $node = $c.node; } ;
+	c1=run_backwards { $node = $c1.node; } | 
+	c2=turn_left     { $node = $c2.node; } | 
+	c3=turn_right    { $node = $c3.node; } | 
+	c4=set_color     { $node = $c4.node; } |
+	c5=writeln       { $node = $c5.node; } ;
 
 run_forward returns [ASTNode node]: RF numeric_expression 
 	{
@@ -54,10 +68,11 @@ set_color returns [ASTNode node]: SC n1=numeric_expression COMMA n2=numeric_expr
 		$node = new SetColor(car,$n1.node,$n2.node,$n3.node,$n4.node);
 	};
 	
-writeln returns [ASTNode node]: WRITELN s=string_value 
-	{ 
-		$node = new Writeln($s.node);
-	} ;
+writeln returns [ASTNode node]: 
+	WRITELN s=string_value{	$node = new Writeln($s.node);}|
+	WRITELN s1=numeric_expression{ $node = new Writeln($s1.node);}|
+	WRITELN s2=logical_expression{ $node = new Writeln($s2.node);}
+	;
 	
 while_loop returns [ASTNode node]: 
 	WHILE PAR_OPEN l=logical_expression PAR_CLOSE BRACKET_OPEN
@@ -71,16 +86,22 @@ while_loop returns [ASTNode node]:
 conditional returns [ASTNode node]: IF PAR_OPEN l=logical_expression PAR_CLOSE BRACKET_OPEN 
 				{
 					List<ASTNode> main_body = new ArrayList<>();
+					List<ASTNode> else_body = new ArrayList<>();
 				}
 				(s1=sentence { main_body.add($s1.node); })*  
 			BRACKET_CLOSE ( ELSE BRACKET_OPEN 
-				{
-					List<ASTNode> else_body = new ArrayList<>();
-				}
 				(s2=sentence { else_body.add($s2.node); })*
 			BRACKET_CLOSE )?{
 				$node = new Conditional($l.node , main_body , else_body);
 			};
+
+var_declare returns [ASTNode node]:
+	VAR ID;
+
+var_assign returns [ASTNode node]:
+	ID ASSIGN string_value
+	ID ASSIGN numeric_expression
+	ID ASSIGN logical_expression;
 
 logical_expression returns [ASTNode node]: 
 	PAR_OPEN l=logical_expression PAR_CLOSE { $node = $l.node; } | 
@@ -110,7 +131,7 @@ numeric_expression returns [ASTNode node]:
 ;
 
 string_value returns [ASTNode node]: 
-	STRING{ $node = new StringValue($STRING.text)};
+	STRING{ $node = new StringValue($STRING.text); };
 
 logical_value returns [ASTNode node]: 
 	TRUE { $node = new LogicalValue($TRUE.text); } | 
@@ -162,7 +183,7 @@ COMMA: ',';
 TRUE: 'true';
 FALSE: 'false';
 
-STRING: '"'[.^"]*'"';
+STRING: '"' ~'"'* '"';
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
 NUMBER: ('-')?[0-9]+(['.'][0-9]+)?;
 

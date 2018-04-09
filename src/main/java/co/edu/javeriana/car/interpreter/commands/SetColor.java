@@ -1,5 +1,7 @@
 package co.edu.javeriana.car.interpreter.commands;
 
+import java.util.Map;
+
 import co.edu.javeriana.car.Car;
 import co.edu.javeriana.car.interpreter.ASTNode;
 
@@ -19,11 +21,11 @@ public class SetColor extends Command {
 	}
 
 	@Override
-	public Object execute() {
-		car.color( (float)red.execute(), 
-				 (float)green.execute(), 
-				  (float)blue.execute(), 
-				 (float)alpha.execute());
+	public Object execute(Map<String, Object> symbolTable) {
+		car.color( (float)red.execute(null), 
+				 (float)green.execute(null), 
+				  (float)blue.execute(null), 
+				 (float)alpha.execute(null));
 		return null;
 	}
 
