@@ -10,31 +10,114 @@ public CarParser(TokenStream input, Car car) {
 }
 }
 
-program: sentence* ;
-sentence: command ;
-command: run_forward | run_backwards | turn_left | turn_right | set_color ;
-run_forward: RF numeric_value 
+program returns [ASTNode node]:	
 	{
-		car.forward((float)$numeric_value.value);
-	};
-run_backwards: RB numeric_value 
+		List<ASTNode> body = new ArrayList<>();	
+	} (s=sentence{
+		body.add( $s.node );
+	})*
 	{
-		car.backwards((float)$numeric_value.value);
+		$node = new Program(body);
 	};
-turn_left: TL numeric_value 
+
+sentence returns [ASTNode node]: 
+	s=conditional { $node = $s.node } | 
+	s=while_loop  { $node = $s.node } | 
+	s=command     { $node = $s.node } ;
+	
+command returns [ASTNode node]: 
+	c=run_forward   { $node = $c.node; } | 
+	c=run_backwards { $node = $c.node; } | 
+	c=turn_left     { $node = $c.node; } | 
+	c=turn_right    { $node = $c.node; } | 
+	c=set_color     { $node = $c.node; } |
+	c=writeln       { $node = $c.node; } ;
+
+run_forward returns [ASTNode node]: RF numeric_expression 
 	{
-		car.left((float)$numeric_value.value);
+		$node = new RunForwards(car,$numeric_expression.node);
 	};
-turn_right: TR numeric_value 
+run_backwards returns [ASTNode node]: RB numeric_expression 
 	{
-		car.right((float)$numeric_value.value);
+		$node = new RunBackwards(car,$numeric_expression.node);
 	};
-set_color: SC n1=numeric_value COMMA n2=numeric_value COMMA n3=numeric_value COMMA n4=numeric_value 
+turn_left returns [ASTNode node]: TL numeric_expression 
 	{
-		car.color((float)$n1.value,(float)$n2.value,(float)$n3.value,(float)$n4.value);
+		$node = new TurnLeft(car,$numeric_expression.node);	
 	};
-numeric_value returns [Object value]: 
-	NUMBER { $value = Float.parseFloat($NUMBER.text); };
+turn_right returns [ASTNode node]: TR numeric_expression 
+	{
+		$node = new TurnRight(car,$numeric_expression.node);
+	};
+set_color returns [ASTNode node]: SC n1=numeric_expression COMMA n2=numeric_expression COMMA n3=numeric_expression COMMA n4=numeric_expression 
+	{
+		$node = new SetColor(car,$n1.node,$n2.node,$n3.node,$n4.node);
+	};
+	
+writeln returns [ASTNode node]: WRITELN s=string_value 
+	{ 
+		$node = new Writeln($s.node);
+	} ;
+	
+while_loop returns [ASTNode node]: 
+	WHILE PAR_OPEN l=logical_expression PAR_CLOSE BRACKET_OPEN
+		{
+			List<ASTNode> body = new ArrayList<>();	
+		}
+		(s1=sentence { body.add($s1.node); })*
+	BRACKET_CLOSE { $node = new While( $l.node , body );}
+;
+	
+conditional returns [ASTNode node]: IF PAR_OPEN l=logical_expression PAR_CLOSE BRACKET_OPEN 
+				{
+					List<ASTNode> main_body = new ArrayList<>();
+				}
+				(s1=sentence { main_body.add($s1.node); })*  
+			BRACKET_CLOSE ( ELSE BRACKET_OPEN 
+				{
+					List<ASTNode> else_body = new ArrayList<>();
+				}
+				(s2=sentence { else_body.add($s2.node); })*
+			BRACKET_CLOSE )?{
+				$node = new Conditional($l.node , main_body , else_body);
+			};
+
+logical_expression returns [ASTNode node]: 
+	PAR_OPEN l=logical_expression PAR_CLOSE { $node = $l.node; } | 
+	l1=logical_expression AND l2=logical_expression { $node = new And($l1.node,$l2.node); } |
+	l1=logical_expression OR  l2=logical_expression { $node = new Or($l1.node,$l2.node); }| 
+	NOT l=logical_expression { $node = new Not($l.node); }|
+	l1=logical_expression EQ  l2=logical_expression { $node = new Equality($l1.node,$l2.node); }|
+	l1=logical_expression NEQ l2=logical_expression { $node = new Inequality($l1.node,$l2.node); }|
+	n1=numeric_expression GT  n2=numeric_expression { $node = new GreaterThan($n1.node,$n2.node); }|
+	n1=numeric_expression LT  n2=numeric_expression { $node = new LessThan($n1.node,$n2.node); }|
+	n1=numeric_expression GEQ n2=numeric_expression { $node = new GreaterOrEqualThan($n1.node,$n2.node); }|
+	n1=numeric_expression LEQ n2=numeric_expression { $node = new LessOrEqualThan($n1.node,$n2.node); }|
+	n1=numeric_expression EQ  n2=numeric_expression { $node = new Equality($n1.node,$n2.node); }|
+	n1=numeric_expression NEQ n2=numeric_expression { $node = new Inequality($n1.node,$n2.node); }|
+	s1=string_value EQ  s2=string_value { $node = new Equality($s1.node,$s2.node); }|
+	s1=string_value NEQ s2=string_value { $node = new Equality($s1.node,$s2.node); }|
+	logical_value { $node = $logical_value.node; }
+;
+
+numeric_expression returns [ASTNode node]: 
+	PAR_OPEN e1=numeric_expression PAR_CLOSE { $node = $e1.node; }|
+	e2=numeric_expression MULT  e3=numeric_expression { $node = new Multiplication($e2.node , $e3.node); } |
+	e4=numeric_expression DIV   e5=numeric_expression { $node = new Division($e4.node , $e5.node); } |
+	e6=numeric_expression PLUS  e7=numeric_expression { $node = new Addition($e6.node , $e7.node); } |
+	e8=numeric_expression MINUS e9=numeric_expression { $node = new Substraction($e8.node , $e9.node); } |
+	numeric_value { $node = $numeric_value.node; }
+;
+
+string_value returns [ASTNode node]: 
+	STRING{ $node = new StringValue($STRING.text)};
+
+logical_value returns [ASTNode node]: 
+	TRUE { $node = new LogicalValue($TRUE.text); } | 
+	FALSE { $node = new LogicalValue($FALSE.text); };
+
+numeric_value returns [ASTNode node]: 
+	NUMBER { $node = new NumericValue($NUMBER.text); };
 
 //Palabras clave
 VAR: 'var';
