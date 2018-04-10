@@ -13,9 +13,9 @@ public class While extends Control {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		while( (boolean)condition.execute(null) ) {
+		while( (boolean)condition.execute(symbolTable) ) {
 			main_body.forEach((node)->{
-				node.execute(null);
+				node.execute(symbolTable);
 			});
 		}
 		return null;

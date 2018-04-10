@@ -13,7 +13,7 @@ public class RunForwards extends MovementCommand {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		car.forward((float)arg1.execute(null));
+		car.forward((float)arg1.execute(symbolTable));
 		return null;
 	}
 

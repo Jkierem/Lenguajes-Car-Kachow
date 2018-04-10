@@ -1,7 +1,5 @@
 package co.edu.javeriana.car.interpreter.operations.numeric;
 
-import java.util.Map;
-
 import co.edu.javeriana.car.interpreter.ASTNode;
 
 public abstract class NumericExpression extends ASTNode {
@@ -13,8 +11,5 @@ public abstract class NumericExpression extends ASTNode {
 		this.op1 = op1;
 		this.op2 = op2;
 	}
-	
-	@Override
-	public abstract Object execute(Map<String, Object> symbolTable);
 
 }

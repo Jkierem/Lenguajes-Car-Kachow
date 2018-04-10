@@ -16,13 +16,13 @@ public class Inequality extends Comparison {
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
 		if( left instanceof StringValue && right instanceof StringValue) {
-			return !(((String)left.execute(null)).equals((String)right.execute(null))); 
+			return !(((String)left.execute(symbolTable)).equals((String)right.execute(symbolTable))); 
 		}
 		else if( left instanceof LogicalExpression && right instanceof LogicalExpression) {
-			return (boolean)left.execute(null) != (boolean)right.execute(null); 
+			return (boolean)left.execute(symbolTable) != (boolean)right.execute(symbolTable); 
 		}
 		else if( left instanceof NumericExpression && right instanceof NumericExpression) {
-			return (float)left.execute(null) != (float)right.execute(null); 
+			return (float)left.execute(symbolTable) != (float)right.execute(symbolTable); 
 		}
 		return true;
 	}

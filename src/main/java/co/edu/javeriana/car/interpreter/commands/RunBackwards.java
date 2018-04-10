@@ -13,7 +13,7 @@ public class RunBackwards extends MovementCommand {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		car.backwards((float)arg1.execute(null));
+		car.backwards((float)arg1.execute(symbolTable));
 		return null;
 	}
 

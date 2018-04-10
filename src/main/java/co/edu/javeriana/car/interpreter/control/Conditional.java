@@ -16,13 +16,13 @@ public class Conditional extends Control {
 	
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		if( (boolean)this.condition.execute(null) ) {
+		if( (boolean)this.condition.execute(symbolTable) ) {
 			this.main_body.forEach((node)->{
-				node.execute(null);
+				node.execute(symbolTable);
 			});
-		}else if( this.else_body != null ) {
+		}else if( !this.else_body.isEmpty() ) {
 			this.else_body.forEach((node)->{
-				node.execute(null);
+				node.execute(symbolTable);
 			});
 		}
 		return null;

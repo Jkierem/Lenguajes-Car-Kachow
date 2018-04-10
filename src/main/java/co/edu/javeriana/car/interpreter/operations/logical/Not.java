@@ -6,15 +6,13 @@ import co.edu.javeriana.car.interpreter.ASTNode;
 
 public class Not extends LogicalExpression {
 	
-	private ASTNode op1;
-	
 	public Not( ASTNode op1 ) {
-		this.op1 = op1;
+		super(op1);
 	}
 	
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		return !(boolean)op1.execute(null);
+		return !(boolean)op1.execute(symbolTable);
 	}
 
 }

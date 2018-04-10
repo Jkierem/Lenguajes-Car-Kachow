@@ -12,7 +12,7 @@ public class Division extends NumericExpression {
 	
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		return (float)op1.execute(null) / (float)op2.execute(null);
+		return (float)op1.execute(symbolTable) / (float)op2.execute(symbolTable);
 	}
 
 }

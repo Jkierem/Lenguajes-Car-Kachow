@@ -14,7 +14,7 @@ public class Writeln extends ASTNode {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		System.out.println(this.arg1.execute(null));
+		System.out.println(this.arg1.execute(symbolTable));
 		return null;
 	}
 

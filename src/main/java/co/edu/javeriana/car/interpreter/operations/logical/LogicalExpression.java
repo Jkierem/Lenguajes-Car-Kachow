@@ -1,12 +1,11 @@
 package co.edu.javeriana.car.interpreter.operations.logical;
 
-import java.util.Map;
-
 import co.edu.javeriana.car.interpreter.ASTNode;
 
 public abstract class LogicalExpression extends ASTNode {
-
-	@Override
-	public abstract Object execute(Map<String, Object> symbolTable);
-
+	protected ASTNode op1;
+	
+	public LogicalExpression( ASTNode op1 ) {
+		this.op1 = op1;
+	}
 }

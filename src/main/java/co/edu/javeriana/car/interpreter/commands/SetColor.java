@@ -22,10 +22,10 @@ public class SetColor extends Command {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		car.color( (float)red.execute(null), 
-				 (float)green.execute(null), 
-				  (float)blue.execute(null), 
-				 (float)alpha.execute(null));
+		car.color( (float)red.execute(symbolTable), 
+				 (float)green.execute(symbolTable), 
+				  (float)blue.execute(symbolTable), 
+				 (float)alpha.execute(symbolTable));
 		return null;
 	}
 

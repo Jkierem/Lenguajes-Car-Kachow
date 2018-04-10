@@ -1,10 +1,17 @@
-set_color 60,0,60,230
-run_forward 30*2
-turn_right ((30*2)+120)/2
-run_forward 200-50
-turn_left 60--30
-run_backwards 20
-run_forward 300
-set_color 0,40,0,255
-turn_right 45
+var a
+a = 90
+turn_right a
 run_forward 100
+turn_left a
+a = 255
+set_color 0,40,0,255
+a = 0
+while ( a < 5 ){
+	b = 15
+	writeln a
+	if (a < 5){
+		a = a + 1 
+	}
+	run_forward a*b
+}
+writeln b

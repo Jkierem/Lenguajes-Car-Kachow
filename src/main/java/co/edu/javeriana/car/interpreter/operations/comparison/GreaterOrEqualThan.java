@@ -12,7 +12,7 @@ public class GreaterOrEqualThan extends Comparison {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		return (float)left.execute(null) >= (float)right.execute(null);
+		return (float)left.execute(symbolTable) >= (float)right.execute(symbolTable);
 	}
 
 }

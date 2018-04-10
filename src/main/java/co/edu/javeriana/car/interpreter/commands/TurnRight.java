@@ -13,7 +13,7 @@ public class TurnRight extends MovementCommand {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		car.right((float)arg1.execute(null));
+		car.right((float)arg1.execute(symbolTable));
 		return null;
 	}
 

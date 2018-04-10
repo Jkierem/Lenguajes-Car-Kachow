@@ -14,7 +14,7 @@ public class Program extends ASTNode {
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
 		this.sentences.forEach((node)->{
-			node.execute(null);
+			node.execute(symbolTable);
 		});
 		return null;
 	}

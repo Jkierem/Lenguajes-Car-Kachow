@@ -3,6 +3,8 @@ grammar Car;
 @parser::header{
 	import java.util.List;
 	import java.util.ArrayList;
+	import java.util.Map;
+	import java.util.HashMap;
 	import co.edu.javeriana.car.interpreter.*;
 	import co.edu.javeriana.car.interpreter.commands.*;
 	import co.edu.javeriana.car.interpreter.control.*;
@@ -25,22 +27,24 @@ public CarParser(TokenStream input, Car car) {
 program returns [ASTNode node]:	
 	{
 		List<ASTNode> body = new ArrayList<>();	
+		Map<String,Object> symbolTable = new HashMap<>();
 	} (s=sentence{
 		body.add( $s.node );
 	})*
 	{
 		$node = new Program(body);
+		$node.execute(symbolTable);
 	};
 
 sentence returns [ASTNode node]: 
-	s=conditional { $node = $s.node; } | 
+	s0=conditional { $node = $s0.node; } | 
 	s1=while_loop  { $node = $s1.node; } | 
 	s2=command     { $node = $s2.node; } |
-	s3=var_declare|
-	s4=var_assign;
+	s3=var_declare { $node = $s3.node; } |
+	s4=var_assign  { $node = $s4.node; } ;
 	
 command returns [ASTNode node]: 
-	c=run_forward   { $node = $c.node; } | 
+	c0=run_forward   { $node = $c0.node; } | 
 	c1=run_backwards { $node = $c1.node; } | 
 	c2=turn_left     { $node = $c2.node; } | 
 	c3=turn_right    { $node = $c3.node; } | 
@@ -69,10 +73,9 @@ set_color returns [ASTNode node]: SC n1=numeric_expression COMMA n2=numeric_expr
 	};
 	
 writeln returns [ASTNode node]: 
-	WRITELN s=string_value{	$node = new Writeln($s.node);}|
-	WRITELN s1=numeric_expression{ $node = new Writeln($s1.node);}|
-	WRITELN s2=logical_expression{ $node = new Writeln($s2.node);}
-	;
+	WRITELN s0=string_value       {	$node = new Writeln($s0.node); } |
+	WRITELN s1=numeric_expression { $node = new Writeln($s1.node); } |
+	WRITELN s2=logical_expression { $node = new Writeln($s2.node); } ;
 	
 while_loop returns [ASTNode node]: 
 	WHILE PAR_OPEN l=logical_expression PAR_CLOSE BRACKET_OPEN
@@ -96,18 +99,21 @@ conditional returns [ASTNode node]: IF PAR_OPEN l=logical_expression PAR_CLOSE B
 			};
 
 var_declare returns [ASTNode node]:
-	VAR ID;
+	VAR id=ID { $node = new VarDeclare($id.text); };
 
 var_assign returns [ASTNode node]:
-	ID ASSIGN string_value
-	ID ASSIGN numeric_expression
-	ID ASSIGN logical_expression;
+	id0=ID ASSIGN v0=string_value       { $node = new VarAssign($id0.text , $v0.node); } |
+	id1=ID ASSIGN v1=numeric_expression { $node = new VarAssign($id1.text , $v1.node); } |
+	id2=ID ASSIGN v2=logical_expression { $node = new VarAssign($id2.text , $v2.node); } ;
+
+var_ref returns [ASTNode node]:
+	ID { $node = new VarRef($ID.text); } ;
 
 logical_expression returns [ASTNode node]: 
-	PAR_OPEN l=logical_expression PAR_CLOSE { $node = $l.node; } | 
-	l1=logical_expression AND l2=logical_expression { $node = new And($l1.node,$l2.node); } |
+	PAR_OPEN l=logical_expression PAR_CLOSE { $node = $l.node; }| 
+	l1=logical_expression AND l2=logical_expression { $node = new And($l1.node,$l2.node); }|
 	l1=logical_expression OR  l2=logical_expression { $node = new Or($l1.node,$l2.node); }| 
-	NOT l=logical_expression { $node = new Not($l.node); }|
+	NOT l=logical_expression                        { $node = new Not($l.node); }|
 	l1=logical_expression EQ  l2=logical_expression { $node = new Equality($l1.node,$l2.node); }|
 	l1=logical_expression NEQ l2=logical_expression { $node = new Inequality($l1.node,$l2.node); }|
 	n1=numeric_expression GT  n2=numeric_expression { $node = new GreaterThan($n1.node,$n2.node); }|
@@ -118,7 +124,8 @@ logical_expression returns [ASTNode node]:
 	n1=numeric_expression NEQ n2=numeric_expression { $node = new Inequality($n1.node,$n2.node); }|
 	s1=string_value EQ  s2=string_value { $node = new Equality($s1.node,$s2.node); }|
 	s1=string_value NEQ s2=string_value { $node = new Equality($s1.node,$s2.node); }|
-	logical_value { $node = $logical_value.node; }
+	logical_value { $node = $logical_value.node; } |
+	var_ref { $node = $var_ref.node; }
 ;
 
 numeric_expression returns [ASTNode node]: 
@@ -127,15 +134,15 @@ numeric_expression returns [ASTNode node]:
 	e4=numeric_expression DIV   e5=numeric_expression { $node = new Division($e4.node , $e5.node); } |
 	e6=numeric_expression PLUS  e7=numeric_expression { $node = new Addition($e6.node , $e7.node); } |
 	e8=numeric_expression MINUS e9=numeric_expression { $node = new Substraction($e8.node , $e9.node); } |
-	numeric_value { $node = $numeric_value.node; }
-;
+	numeric_value { $node = $numeric_value.node; } |
+	var_ref { $node = $var_ref.node; } ;
 
 string_value returns [ASTNode node]: 
-	STRING{ $node = new StringValue($STRING.text); };
+	STRING { $node = new StringValue($STRING.text); };
 
 logical_value returns [ASTNode node]: 
-	TRUE { $node = new LogicalValue($TRUE.text); } | 
-	FALSE { $node = new LogicalValue($FALSE.text); };
+	TRUE  { $node = new LogicalValue($TRUE.text);  } | 
+	FALSE { $node = new LogicalValue($FALSE.text); } ;
 
 numeric_value returns [ASTNode node]: 
 	NUMBER { $node = new NumericValue($NUMBER.text); };
