@@ -1,5 +1,4 @@
-var a
-a = 90
+var a = 90
 turn_right a
 run_forward 100
 turn_left a

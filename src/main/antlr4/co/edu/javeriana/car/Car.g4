@@ -37,11 +37,12 @@ program returns [ASTNode node]:
 	};
 
 sentence returns [ASTNode node]: 
-	s0=conditional { $node = $s0.node; } | 
-	s1=while_loop  { $node = $s1.node; } | 
-	s2=command     { $node = $s2.node; } |
-	s3=var_declare { $node = $s3.node; } |
-	s4=var_assign  { $node = $s4.node; } ;
+	s0=conditional        { $node = $s0.node; } | 
+	s1=while_loop         { $node = $s1.node; } | 
+	s2=command            { $node = $s2.node; } |
+	s3=var_declare_assign { $node = $s3.node; } |
+	s4=var_declare        { $node = $s4.node; } |
+	s5=var_assign         { $node = $s5.node; } ;
 	
 command returns [ASTNode node]: 
 	c0=run_forward   { $node = $c0.node; } | 
@@ -97,6 +98,28 @@ conditional returns [ASTNode node]: IF PAR_OPEN l=logical_expression PAR_CLOSE B
 			BRACKET_CLOSE )?{
 				$node = new Conditional($l.node , main_body , else_body);
 			};
+
+function_declare returns [ASTNode node]:
+	FUNCTION name=ID {
+		List<String> paramIds = new ArrayList<>();
+		List<ASTNode> body = new ArrayList<>();
+	} PAR_OPEN ( paramId=ID {
+		paramIds.add( $paramId.text );
+	})* PAR_CLOSE BRACKET_OPEN
+		( s=sentence {
+			body.add( $s.node );
+		})*
+	BRACKET_CLOSE{
+		$node = new FunctionDeclare( $name.text , paramIds , body );
+	};
+
+function_ref returns [ASTNode node]:
+	id=ID PAR_OPEN PAR_CLOSE;
+
+var_declare_assign returns [ASTNode node]:
+	VAR id0=ID ASSIGN v0=string_value       { $node = new VarDeclareAssign($id0.text , $v0.node); } |
+	VAR id1=ID ASSIGN v1=numeric_expression { $node = new VarDeclareAssign($id1.text , $v1.node); } |
+	VAR id2=ID ASSIGN v2=logical_expression { $node = new VarDeclareAssign($id2.text , $v2.node); } ;
 
 var_declare returns [ASTNode node]:
 	VAR id=ID { $node = new VarDeclare($id.text); };

@@ -10,7 +10,11 @@ public class VarDeclare extends Variable {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
-		symbolTable.put(name, new Object());
+		if( !symbolTable.containsKey(name) ) {
+			symbolTable.put(name, new Object());
+		}else {
+			throw new Error("Variable \""+name+"\" redeclaration");
+		}
 		return null;
 	}
 
