@@ -1,5 +1,6 @@
 package co.edu.javeriana.car.interpreter.control;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,15 +17,21 @@ public class Conditional extends Control {
 	
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
+		Map<String,Object> localTable = new HashMap<>(symbolTable);
 		if( (boolean)this.condition.execute(symbolTable) ) {
 			this.main_body.forEach((node)->{
-				node.execute(symbolTable);
+				node.execute(localTable);
 			});
 		}else if( !this.else_body.isEmpty() ) {
 			this.else_body.forEach((node)->{
-				node.execute(symbolTable);
+				node.execute(localTable);
 			});
 		}
+		localTable.keySet().forEach((key)->{
+			if( symbolTable.containsKey(key) ) {
+				symbolTable.put(key, localTable.get(key));
+			}
+		});
 		return null;
 	}
 

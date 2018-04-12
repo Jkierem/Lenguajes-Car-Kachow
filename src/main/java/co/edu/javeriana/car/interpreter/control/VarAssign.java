@@ -14,6 +14,9 @@ public class VarAssign extends Variable {
 
 	@Override
 	public Object execute(Map<String, Object> symbolTable) {
+		if( !symbolTable.containsKey(name) ) {
+			throw new Error("Trying to assign undefined reference to \""+name+"\"");
+		}
 		symbolTable.put(name, expression.execute(symbolTable));
 		return null;
 	}

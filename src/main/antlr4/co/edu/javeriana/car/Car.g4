@@ -42,7 +42,9 @@ sentence returns [ASTNode node]:
 	s2=command            { $node = $s2.node; } |
 	s3=var_declare_assign { $node = $s3.node; } |
 	s4=var_declare        { $node = $s4.node; } |
-	s5=var_assign         { $node = $s5.node; } ;
+	s5=var_assign         { $node = $s5.node; } |
+	s6=function_declare   { $node = $s6.node; } |
+	s7=function_ref       { $node = $s7.node; }	;
 	
 command returns [ASTNode node]: 
 	c0=run_forward   { $node = $c0.node; } | 
@@ -74,9 +76,7 @@ set_color returns [ASTNode node]: SC n1=numeric_expression COMMA n2=numeric_expr
 	};
 	
 writeln returns [ASTNode node]: 
-	WRITELN s0=string_value       {	$node = new Writeln($s0.node); } |
-	WRITELN s1=numeric_expression { $node = new Writeln($s1.node); } |
-	WRITELN s2=logical_expression { $node = new Writeln($s2.node); } ;
+	WRITELN expression { $node = new Writeln($expression.node); } ;
 	
 while_loop returns [ASTNode node]: 
 	WHILE PAR_OPEN l=logical_expression PAR_CLOSE BRACKET_OPEN
@@ -103,34 +103,46 @@ function_declare returns [ASTNode node]:
 	FUNCTION name=ID {
 		List<String> paramIds = new ArrayList<>();
 		List<ASTNode> body = new ArrayList<>();
-	} PAR_OPEN ( paramId=ID {
-		paramIds.add( $paramId.text );
-	})* PAR_CLOSE BRACKET_OPEN
-		( s=sentence {
-			body.add( $s.node );
-		})*
+	} PAR_OPEN ( id0=ID {
+		paramIds.add($id0.text);
+	} (COMMA id1=ID {
+		paramIds.add($id1.text);
+	} )* )? PAR_CLOSE BRACKET_OPEN ( sentence {
+		body.add($sentence.node);
+	} )*
 	BRACKET_CLOSE{
 		$node = new FunctionDeclare( $name.text , paramIds , body );
 	};
 
 function_ref returns [ASTNode node]:
-	id=ID PAR_OPEN PAR_CLOSE;
+	ID {
+		List<ASTNode> params = new ArrayList<>(); 
+	}
+	PAR_OPEN ( e0=expression {
+		params.add($e0.node);
+	}(COMMA e1=expression {
+		params.add($e1.node);
+	})* )? PAR_CLOSE{
+		$node = new FunctionRef( $ID.text , params );
+	};
 
 var_declare_assign returns [ASTNode node]:
-	VAR id0=ID ASSIGN v0=string_value       { $node = new VarDeclareAssign($id0.text , $v0.node); } |
-	VAR id1=ID ASSIGN v1=numeric_expression { $node = new VarDeclareAssign($id1.text , $v1.node); } |
-	VAR id2=ID ASSIGN v2=logical_expression { $node = new VarDeclareAssign($id2.text , $v2.node); } ;
+	VAR ID ASSIGN expression { $node = new VarDeclareAssign($ID.text , $expression.node); } ;
 
 var_declare returns [ASTNode node]:
-	VAR id=ID { $node = new VarDeclare($id.text); };
+	VAR ID { $node = new VarDeclare($ID.text); } ;
 
 var_assign returns [ASTNode node]:
-	id0=ID ASSIGN v0=string_value       { $node = new VarAssign($id0.text , $v0.node); } |
-	id1=ID ASSIGN v1=numeric_expression { $node = new VarAssign($id1.text , $v1.node); } |
-	id2=ID ASSIGN v2=logical_expression { $node = new VarAssign($id2.text , $v2.node); } ;
+	ID ASSIGN expression { $node = new VarAssign($ID.text , $expression.node); } ;
 
 var_ref returns [ASTNode node]:
 	ID { $node = new VarRef($ID.text); } ;
+
+expression returns[ASTNode node]:
+	var_ref { $node = $var_ref.node; } |
+	logical_expression { $node = $logical_expression.node; } |
+	numeric_expression { $node = $numeric_expression.node; } |
+	string_value       { $node = $string_value.node; } ;
 
 logical_expression returns [ASTNode node]: 
 	PAR_OPEN l=logical_expression PAR_CLOSE { $node = $l.node; }| 
@@ -157,6 +169,7 @@ numeric_expression returns [ASTNode node]:
 	e4=numeric_expression DIV   e5=numeric_expression { $node = new Division($e4.node , $e5.node); } |
 	e6=numeric_expression PLUS  e7=numeric_expression { $node = new Addition($e6.node , $e7.node); } |
 	e8=numeric_expression MINUS e9=numeric_expression { $node = new Substraction($e8.node , $e9.node); } |
+	MINUS e10=numeric_expression { $node = new Substraction( new NumericValue("0"), $e10.node) ; } |
 	numeric_value { $node = $numeric_value.node; } |
 	var_ref { $node = $var_ref.node; } ;
 
@@ -215,7 +228,7 @@ FALSE: 'false';
 
 STRING: '"' ~'"'* '"';
 ID: [a-zA-Z_][a-zA-Z0-9_]*;
-NUMBER: ('-')?[0-9]+(['.'][0-9]+)?;
+NUMBER: [0-9]+(['.'][0-9]+)?;
 
 WS
 :

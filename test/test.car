@@ -1,16 +1,38 @@
+procedure print(n){
+	var g = n
+	writeln g
+}
+
+procedure recurPrint(n,c){
+	var d = 0
+	if( c >= 1 ){
+		writeln n
+	}else{
+		writeln "recursion"
+		recurPrint(n,c+1)
+	}
+}
+
 var a = 90
 turn_right a
 run_forward 100
 turn_left a
 a = 255
-set_color 0,40,0,255
+set_color 0,a,0,255
 a = 0
+
+var z = 20
+if(true){
+	z = 10
+}
+writeln z
+
+recurPrint(a,0)
 while ( a < 5 ){
-	b = 15
-	writeln a
+	var b = 15
 	if (a < 5){
 		a = a + 1 
 	}
 	run_forward a*b
 }
-writeln b
+recurPrint(a,0)
