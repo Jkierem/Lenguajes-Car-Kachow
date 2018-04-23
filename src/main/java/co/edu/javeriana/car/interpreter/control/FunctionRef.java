@@ -18,6 +18,16 @@ public class FunctionRef extends Function {
 			FunctionDeclare funkNode = (FunctionDeclare)symbolTable.get(id);
 			Map<String,Object> localTable = new HashMap<>(funkNode.getLocalSymbolTable());
 			List<String> paramIds = funkNode.getParamIds();
+			int funkParams = paramIds.size();
+			int refParams = this.body.size();
+			if( funkParams != refParams ) {
+				String fParams = Integer.toString(funkParams) + " parameter" +
+									( funkParams != 1?"s":"");
+				String rParams = Integer.toString(refParams) + " parameter" +
+									( refParams != 1?"s":"");
+				throw new Error("Parameters don't match. Function \""
+									+id+"\" expects "+ fParams +" but received "+ rParams);
+			}
 			for( int i = 0 ; i < paramIds.size() ; i++ ) {
 				localTable.put( paramIds.get(i) , this.body.get(i).execute(symbolTable) );
 			}
